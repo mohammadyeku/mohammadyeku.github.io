@@ -12,7 +12,9 @@ document.querySelectorAll(".gallery .zoom").forEach((btn) => {
     const caption = btn.closest("figure").querySelector("figcaption");
     lbImg.src = img.currentSrc || img.src;
     lbImg.alt = img.alt;
-    lbCaption.textContent = caption ? caption.textContent.trim() : "";
+    lbCaption.textContent = caption
+      ? [...caption.children].map((el) => el.textContent.trim()).join(" — ")
+      : "";
     lightbox.showModal();
   });
 });

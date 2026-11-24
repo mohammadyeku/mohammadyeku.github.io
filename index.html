@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- EDIT: page title + description show up in Google results and link previews -->
   <title>Ikuta Moha — Music &amp; Graphic Design</title>
-  <meta name="description" content="Portfolio of Ikuta Moha: original music and graphic design work.">
-  <meta name="theme-color" content="#0e0e10">
+  <meta name="description" content="Portfolio of Ikuta Moha (幾多百晴): original music and graphic design work.">
+  <meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b0b0b" media="(prefers-color-scheme: dark)">
 
   <!-- Link previews (Discord, iMessage, X, etc.) -->
   <meta property="og:type" content="website">
@@ -23,7 +24,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Only the kanji used on the page are downloaded -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500&text=音楽意匠略歴連絡幾多百晴&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -31,7 +34,9 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
-    <a class="logo" href="#top" aria-label="Back to top">IM<span>.</span></a>
+    <a class="brand" href="#top" aria-label="Ikuta Moha, back to top">
+      <span class="star" aria-hidden="true"></span>Ikuta Moha
+    </a>
     <nav aria-label="Main">
       <ul>
         <li><a href="#music">Music</a></li>
@@ -46,168 +51,179 @@
 
     <!-- ============ HERO ============ -->
     <section class="hero" id="top">
-      <p class="eyebrow">Music producer &amp; graphic designer</p>
-      <h1>Ikuta<br><span class="outline">Moha</span></h1>
-      <!-- EDIT: one or two lines about what you make -->
-      <p class="lede">I make sounds and shapes — original tracks, cover art, posters and visual identities.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#music">Listen</a>
-        <a class="btn" href="#design">See the work</a>
-      </div>
+      <p class="vertical v-left">Ikuta Moha</p>
+      <h1 class="hero-logo">
+        <svg viewBox="0 0 1423 1829" role="img" aria-label="幾多百晴 — Ikuta Moha"><use href="images/logo.svg#logo"/></svg>
+      </h1>
+      <p class="vertical v-right">Music <span class="star" aria-hidden="true"></span> Graphic design</p>
+      <!-- EDIT: one line about what you make -->
+      <p class="hero-intro">Sounds and shapes — original tracks, cover art, posters and visual identities.</p>
+      <a class="scroll-cue" href="#music" aria-label="Scroll to music"><span class="star" aria-hidden="true"></span></a>
     </section>
 
     <!-- ============ MUSIC ============ -->
     <section class="section" id="music" aria-labelledby="music-title">
-      <div class="section-head">
-        <span class="section-num">01</span>
+      <aside class="section-label" aria-hidden="true"><span class="num">01</span><span class="jp" lang="ja">音楽</span></aside>
+      <div class="section-body">
         <h2 id="music-title">Music</h2>
-      </div>
+        <span class="rule" aria-hidden="true"></span>
 
-      <!--
-        HOW TO ADD A TRACK
-        Copy one <article class="track"> block per track and paste the
-        embed <iframe> from the platform's "Share > Embed" button
-        in place of the placeholder <div class="embed-placeholder">.
+        <!--
+          HOW TO ADD A TRACK
+          Copy one <article class="track"> block per track and paste the
+          embed <iframe> from the platform's "Share > Embed" button
+          in place of the placeholder <div class="embed-placeholder">.
 
-        SoundCloud (Share > Embed > copy code), e.g.:
-          <iframe class="embed embed-soundcloud" loading="lazy" allow="autoplay"
-            src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/TRACK_ID&color=%23c8ff3d&visual=true"
-            title="Track title on SoundCloud"></iframe>
+          SoundCloud (Share > Embed > copy code), e.g.:
+            <iframe class="embed embed-soundcloud" loading="lazy" allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/TRACK_ID&color=%230b0b0b&visual=true"
+              title="Track title on SoundCloud"></iframe>
 
-        YouTube (Share > Embed), e.g.:
-          <iframe class="embed embed-video" loading="lazy"
-            src="https://www.youtube-nocookie.com/embed/VIDEO_ID"
-            title="Track title on YouTube"
-            allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          YouTube (Share > Embed), e.g.:
+            <iframe class="embed embed-video" loading="lazy"
+              src="https://www.youtube-nocookie.com/embed/VIDEO_ID"
+              title="Track title on YouTube"
+              allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-        Bandcamp (Share/Embed > choose "Standard" size), e.g.:
-          <iframe class="embed embed-bandcamp" loading="lazy"
-            src="https://bandcamp.com/EmbeddedPlayer/track=TRACK_ID/size=large/bgcol=0e0e10/linkcol=c8ff3d/tracklist=false/artwork=small/transparent=true/"
-            title="Track title on Bandcamp" seamless></iframe>
-      -->
-      <div class="tracks">
-        <article class="track">
-          <div class="embed-placeholder" aria-hidden="true"><span>SoundCloud / YouTube / Bandcamp embed</span></div>
-          <h3>Track title one</h3>
-          <p class="meta">Single · 2026</p>
-        </article>
+          Bandcamp (Share/Embed > choose "Standard" size), e.g.:
+            <iframe class="embed embed-bandcamp" loading="lazy"
+              src="https://bandcamp.com/EmbeddedPlayer/track=TRACK_ID/size=large/bgcol=ffffff/linkcol=0b0b0b/tracklist=false/artwork=small/transparent=true/"
+              title="Track title on Bandcamp" seamless></iframe>
+        -->
+        <div class="tracks">
+          <article class="track">
+            <div class="embed-placeholder" aria-hidden="true"><span>Embed</span></div>
+            <div class="track-info">
+              <h3>Track title one</h3>
+              <p class="meta">Single · 2026</p>
+            </div>
+          </article>
 
-        <article class="track">
-          <div class="embed-placeholder" aria-hidden="true"><span>SoundCloud / YouTube / Bandcamp embed</span></div>
-          <h3>Track title two</h3>
-          <p class="meta">EP · 2025</p>
-        </article>
+          <article class="track">
+            <div class="embed-placeholder" aria-hidden="true"><span>Embed</span></div>
+            <div class="track-info">
+              <h3>Track title two</h3>
+              <p class="meta">EP · 2025</p>
+            </div>
+          </article>
 
-        <article class="track">
-          <div class="embed-placeholder" aria-hidden="true"><span>SoundCloud / YouTube / Bandcamp embed</span></div>
-          <h3>Track title three</h3>
-          <p class="meta">Collab · 2025</p>
-        </article>
+          <article class="track">
+            <div class="embed-placeholder" aria-hidden="true"><span>Embed</span></div>
+            <div class="track-info">
+              <h3>Track title three</h3>
+              <p class="meta">Collab · 2025</p>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
     <!-- ============ DESIGN ============ -->
     <section class="section" id="design" aria-labelledby="design-title">
-      <div class="section-head">
-        <span class="section-num">02</span>
+      <aside class="section-label" aria-hidden="true"><span class="num">02</span><span class="jp" lang="ja">意匠</span></aside>
+      <div class="section-body">
         <h2 id="design-title">Design</h2>
-      </div>
+        <span class="rule" aria-hidden="true"></span>
 
-      <!--
-        HOW TO ADD A DESIGN PIECE
-        1. Put the image in the images/ folder (JPG or WebP, ~1600px wide, under ~500 KB).
-        2. Copy a <figure> block, update src, alt and the caption.
-        Add class "wide" to a <figure> to make it span two columns.
-        Clicking an image opens it full-size.
-      -->
-      <div class="gallery">
-        <figure class="wide">
-          <button class="zoom" type="button" aria-label="View larger: Poster series">
-            <img src="images/design-01.svg" alt="Poster series placeholder" loading="lazy" width="1600" height="1000">
-          </button>
-          <figcaption><strong>Poster series</strong> Print · 2026</figcaption>
-        </figure>
-        <figure>
-          <button class="zoom" type="button" aria-label="View larger: Album cover">
-            <img src="images/design-02.svg" alt="Album cover placeholder" loading="lazy" width="1000" height="1000">
-          </button>
-          <figcaption><strong>Album cover</strong> Cover art · 2026</figcaption>
-        </figure>
-        <figure>
-          <button class="zoom" type="button" aria-label="View larger: Brand identity">
-            <img src="images/design-03.svg" alt="Brand identity placeholder" loading="lazy" width="1000" height="1000">
-          </button>
-          <figcaption><strong>Brand identity</strong> Logo &amp; type · 2025</figcaption>
-        </figure>
-        <figure>
-          <button class="zoom" type="button" aria-label="View larger: Gig flyer">
-            <img src="images/design-04.svg" alt="Gig flyer placeholder" loading="lazy" width="1000" height="1000">
-          </button>
-          <figcaption><strong>Gig flyer</strong> Event · 2025</figcaption>
-        </figure>
-        <figure>
-          <button class="zoom" type="button" aria-label="View larger: Merch graphic">
-            <img src="images/design-05.svg" alt="Merch graphic placeholder" loading="lazy" width="1000" height="1000">
-          </button>
-          <figcaption><strong>Merch graphic</strong> Apparel · 2025</figcaption>
-        </figure>
-        <figure class="wide">
-          <button class="zoom" type="button" aria-label="View larger: Type experiment">
-            <img src="images/design-06.svg" alt="Type experiment placeholder" loading="lazy" width="1600" height="1000">
-          </button>
-          <figcaption><strong>Type experiment</strong> Personal · 2024</figcaption>
-        </figure>
+        <!--
+          HOW TO ADD A DESIGN PIECE
+          1. Put the image in the images/ folder (JPG or WebP, ~1600px wide, under ~500 KB).
+          2. Copy a <figure> block, update src, alt and the caption.
+          Add class "wide" to a <figure> to make it span two columns.
+          Clicking an image opens it full-size.
+        -->
+        <div class="gallery">
+          <figure class="wide">
+            <button class="zoom" type="button" aria-label="View larger: Poster series">
+              <img src="images/design-01.svg" alt="Poster series placeholder" loading="lazy" width="1600" height="1000">
+            </button>
+            <figcaption><em>Poster series</em><span>Print · 2026</span></figcaption>
+          </figure>
+          <figure>
+            <button class="zoom" type="button" aria-label="View larger: Album cover">
+              <img src="images/design-02.svg" alt="Album cover placeholder" loading="lazy" width="1000" height="1000">
+            </button>
+            <figcaption><em>Album cover</em><span>Cover art · 2026</span></figcaption>
+          </figure>
+          <figure>
+            <button class="zoom" type="button" aria-label="View larger: Brand identity">
+              <img src="images/design-03.svg" alt="Brand identity placeholder" loading="lazy" width="1000" height="1000">
+            </button>
+            <figcaption><em>Brand identity</em><span>Logo &amp; type · 2025</span></figcaption>
+          </figure>
+          <figure>
+            <button class="zoom" type="button" aria-label="View larger: Gig flyer">
+              <img src="images/design-04.svg" alt="Gig flyer placeholder" loading="lazy" width="1000" height="1000">
+            </button>
+            <figcaption><em>Gig flyer</em><span>Event · 2025</span></figcaption>
+          </figure>
+          <figure>
+            <button class="zoom" type="button" aria-label="View larger: Merch graphic">
+              <img src="images/design-05.svg" alt="Merch graphic placeholder" loading="lazy" width="1000" height="1000">
+            </button>
+            <figcaption><em>Merch graphic</em><span>Apparel · 2025</span></figcaption>
+          </figure>
+          <figure class="wide">
+            <button class="zoom" type="button" aria-label="View larger: Type experiment">
+              <img src="images/design-06.svg" alt="Type experiment placeholder" loading="lazy" width="1600" height="1000">
+            </button>
+            <figcaption><em>Type experiment</em><span>Personal · 2024</span></figcaption>
+          </figure>
+        </div>
       </div>
     </section>
 
     <!-- ============ ABOUT ============ -->
     <section class="section" id="about" aria-labelledby="about-title">
-      <div class="section-head">
-        <span class="section-num">03</span>
+      <aside class="section-label" aria-hidden="true"><span class="num">03</span><span class="jp" lang="ja">略歴</span></aside>
+      <div class="section-body">
         <h2 id="about-title">About</h2>
-      </div>
-      <div class="about">
-        <!-- EDIT: swap images/portrait.svg for a photo of you (square, ~800px) -->
-        <img class="portrait" src="images/portrait.svg" alt="Portrait of Ikuta Moha" width="800" height="800" loading="lazy">
-        <div class="about-text">
-          <!-- EDIT: your bio -->
-          <p class="big">Short intro line that says who you are and what you do.</p>
-          <p>A few sentences about your background: where you're based, how you got into music and design, the tools you use, the kind of projects you like, and anyone you've worked with.</p>
-          <ul class="tags" aria-label="Skills">
-            <li>Production</li>
-            <li>Mixing</li>
-            <li>Cover art</li>
-            <li>Posters</li>
-            <li>Brand identity</li>
-            <li>Typography</li>
-          </ul>
+        <span class="rule" aria-hidden="true"></span>
+        <div class="about">
+          <!-- EDIT: swap images/portrait.svg for a photo of you (square, ~800px) -->
+          <img class="portrait" src="images/portrait.svg" alt="Portrait of Ikuta Moha" width="800" height="800" loading="lazy">
+          <div class="about-text">
+            <!-- EDIT: your bio -->
+            <p class="big">Short intro line that says who you are and what you do.</p>
+            <p>A few sentences about your background: where you're based, how you got into music and design, the tools you use, the kind of projects you like, and anyone you've worked with.</p>
+            <ul class="tags" aria-label="Skills">
+              <li>Production</li>
+              <li>Mixing</li>
+              <li>Cover art</li>
+              <li>Posters</li>
+              <li>Brand identity</li>
+              <li>Typography</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ============ CONTACT ============ -->
     <section class="section contact" id="contact" aria-labelledby="contact-title">
-      <div class="section-head">
-        <span class="section-num">04</span>
+      <aside class="section-label" aria-hidden="true"><span class="num">04</span><span class="jp" lang="ja">連絡</span></aside>
+      <div class="section-body">
         <h2 id="contact-title">Contact</h2>
+        <span class="rule" aria-hidden="true"></span>
+        <p class="lede">Open to commissions, collabs and bookings.</p>
+        <!-- EDIT: your public contact email (in both places) -->
+        <a class="email" href="mailto:you@example.com">you@example.com</a>
+        <!-- EDIT: put your real profile URLs in the href="" values; delete any you don't use -->
+        <ul class="socials">
+          <li><a href="https://soundcloud.com/" rel="me noopener" target="_blank">SoundCloud</a></li>
+          <li><a href="https://bandcamp.com/" rel="me noopener" target="_blank">Bandcamp</a></li>
+          <li><a href="https://www.youtube.com/" rel="me noopener" target="_blank">YouTube</a></li>
+          <li><a href="https://www.instagram.com/" rel="me noopener" target="_blank">Instagram</a></li>
+          <li><a href="https://www.behance.net/" rel="me noopener" target="_blank">Behance</a></li>
+        </ul>
       </div>
-      <p class="lede">Open to commissions, collabs and bookings.</p>
-      <!-- EDIT: your public contact email (in both places) -->
-      <a class="email" href="mailto:you@example.com">you@example.com</a>
-      <!-- EDIT: put your real profile URLs in the href="" values; delete any you don't use -->
-      <ul class="socials">
-        <li><a href="https://soundcloud.com/" rel="me noopener" target="_blank">SoundCloud</a></li>
-        <li><a href="https://bandcamp.com/" rel="me noopener" target="_blank">Bandcamp</a></li>
-        <li><a href="https://www.youtube.com/" rel="me noopener" target="_blank">YouTube</a></li>
-        <li><a href="https://www.instagram.com/" rel="me noopener" target="_blank">Instagram</a></li>
-        <li><a href="https://www.behance.net/" rel="me noopener" target="_blank">Behance</a></li>
-      </ul>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>© <span id="year">2026</span> Ikuta Moha</p>
-    <a href="#top">Back to top ↑</a>
+    <svg class="footer-logo" viewBox="0 0 1423 1829" aria-hidden="true"><use href="images/logo.svg#logo"/></svg>
+    <p>© <span id="year">2026</span> <span lang="ja">幾多百晴</span> Ikuta Moha</p>
+    <a href="#top">Back to top</a>
   </footer>
 
   <!-- Full-size image viewer -->

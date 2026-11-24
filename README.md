@@ -10,7 +10,11 @@ Everything you'll change is in `index.html`; look for `EDIT:` comments.
   (examples in the comment above the tracks). Don't put audio files in this repo.
 - **Design work:** drop images into `images/` (JPG/WebP, ~1600px wide, < 500 KB)
   and update the `<figure>` blocks.
-- **Colours / fonts:** the variables at the top of `css/style.css`.
+- **Colours / fonts:** the variables at the top of `css/style.css` (light and dark sets).
+- **Logo:** `images/logo.svg` is a single path with `id="logo"` and `fill="currentColor"`,
+  so `<svg viewBox="0 0 1423 1829"><use href="images/logo.svg#logo"/></svg>` takes the
+  text colour (black on light, white on dark). `images/star.svg` is the matching
+  four-point star used across the site; `images/favicon.svg` is the browser tab icon.
 
 Preview locally by opening `index.html` in a browser. Commit and push to `main`;
 GitHub Pages republishes in about a minute.
