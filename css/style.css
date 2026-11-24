@@ -119,7 +119,7 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
 }
 .hero-logo { grid-column: 2; grid-row: 1; line-height: 0; }
 .hero-logo svg {
-  height: clamp(320px, 66vh, 660px); width: auto; aspect-ratio: 1423 / 1829;
+  height: clamp(320px, 66vh, 660px); width: auto; aspect-ratio: 1421 / 1826;
   fill: currentColor;
   animation: rise 1.2s var(--ease) both;
 }
@@ -250,7 +250,7 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
   color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em;
 }
 .site-footer p { margin: 0; }
-.footer-logo { grid-column: 2; grid-row: 1; height: 96px; width: auto; aspect-ratio: 1423 / 1829; fill: var(--ink); }
+.footer-logo { grid-column: 2; grid-row: 1; height: 96px; width: auto; aspect-ratio: 1421 / 1826; fill: var(--ink); }
 .site-footer p { grid-column: 1; grid-row: 1; }
 .site-footer a { grid-column: 3; grid-row: 1; justify-self: end; text-decoration: none; text-transform: uppercase; letter-spacing: 0.16em; }
 .site-footer a:hover { color: var(--ink); }
