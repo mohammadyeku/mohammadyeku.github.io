@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Logo rebuild tool</title>
+<style>
+  body { margin: 0; padding: 16px; background: #fff; color: #111; font: 13px/1.5 system-ui, sans-serif; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  button { font: inherit; padding: 6px 12px; border: 1px solid #111; background: #fff; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: flex-start; }
+  #src, #bin, #out svg { width: 32vw; height: auto; border: 1px solid #ccc; }
+  #log { white-space: pre-wrap; background: #f4f4f2; padding: 8px; }
+</style>
+<!-- Pinned tracer version: the output depends on it -->
+<script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"></script>
+</head>
+<body>
+<div class="bar">
+  <button id="build" type="button">Rebuild logo</button>
+  <button id="dl-logo" type="button" disabled>Download logo.svg</button>
+  <button id="dl-fav" type="button" disabled>Download favicon.svg</button>
+  <button id="dl-star" type="button" disabled>Download star.svg</button>
+  <span id="status">Serve the project folder over http (not file://), then press Rebuild.</span>
+</div>
+<div class="row"><img id="src" src="logo-original.webp" alt="Original scan"><canvas id="bin"></canvas><div id="out"></div></div>
+<pre id="log"></pre>
+
+<script>
+const log = (...a) => (document.getElementById('log').textContent += a.join(' ') + '\n');
+
+// 1. Upscale, blur and threshold the scan into a clean black/white bitmap.
+async function prep({ scale = 2, blur = 2.5, thresh = 128 } = {}) {
+  const img = document.getElementById('src');
+  await img.decode();
+  const W = Math.round(img.naturalWidth * scale), H = Math.round(img.naturalHeight * scale);
+  const c = document.getElementById('bin'); c.width = W; c.height = H;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+  x.imageSmoothingQuality = 'high';
+  x.filter = `grayscale(1) blur(${blur * scale}px)`;
+  x.drawImage(img, 0, 0, W, H);
+  x.filter = 'none';
+  const d = x.getImageData(0, 0, W, H), p = d.data;
+  let minX = W, minY = H, maxX = 0, maxY = 0;
+  for (let i = 0; i < p.length; i += 4) {
+    const v = p[i] < thresh ? 0 : 255;
+    p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255;
+    if (!v) { const k = i / 4, px = k % W, py = (k / W) | 0;
+      if (px < minX) minX = px; if (px > maxX) maxX = px; if (py < minY) minY = py; if (py > maxY) maxY = py; }
+  }
+  x.putImageData(d, 0, 0);
+  return { d, W, H, bbox: { minX, minY, maxX, maxY }, scale, natW: img.naturalWidth, natH: img.naturalHeight };
+}
+</script>
+<script src="smooth.js"></script>
+<script src="compose.js"></script>
+<script src="analyze.js"></script>
+<script src="rebuild.js"></script>
+<script src="diff.js"></script>
+<script>
+// The exact settings used for images/logo.svg (Nov 2026). Change these to experiment.
+const SETTINGS = {
+  prep: { scale: 2, blur: 4, thresh: 120 },
+  rebuild: {
+    baseThresh: 120, blur: 4,
+    target: 25,          // stroke width every component is pulled toward (px at original size)
+    strength: 0.8,       // 0 = keep original weights, 1 = fully even
+    starIds: [2, 4, 7, 9, 11],   // free-standing stars, redrawn as geometric stars
+    doubleStars: [11],           // the two touching stars in 晴, split into two
+    shifts: { ta: [10, 24], hare: [-6, 22] },   // per-character moves (px): 多, 晴
+  },
+  trace: { pathomit: 60, k: 20, turnDeg: 58, sigma: 14, eps: 1.5 },  // corner detection + smoothing
+  pad: 24,
+  starRoundness: 0.2,
+};
+
+const files = {};
+
+function logoFile(svg) {
+  const vb = svg.match(/viewBox="([^"]+)"/)[1], d = svg.match(/ d="([^"]+)"/)[1];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" role="img" aria-labelledby="t">\n<title id="t">幾多百晴 — Ikuta Moha</title>\n<path id="logo" fill="currentColor" fill-rule="evenodd" d="${d}"/>\n</svg>\n`;
+}
+
+window.buildAll = async () => {
+  document.getElementById('log').textContent = '';
+  window.lastInfo = await prep(SETTINGS.prep);
+  const weights = await rebuild(SETTINGS.rebuild);
+  log('components (id, character, measured width, per-side change):');
+  for (const w of weights) log(' ', w.id, w.char, w.w, w.perSide);
+  const r = composeRebuilt(SETTINGS.trace, SETTINGS.pad, SETTINGS.starRoundness);
+  files['logo.svg'] = logoFile(lastSvg);
+  const k = SETTINGS.starRoundness;
+  files['favicon.svg'] = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><style>path{fill:#000}@media (prefers-color-scheme:dark){path{fill:#fff}}</style><path d="${starPath({ cx: 32, cy: 32, rx: 26, ry: 26 }, k)}"/></svg>\n`;
+  files['star.svg'] = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path id="star" fill="currentColor" d="${starPath({ cx: 32, cy: 32, rx: 32, ry: 32 }, k)}"/></svg>\n`;
+  log(`logo.svg: viewBox 0 0 ${r.w} ${r.h}, ${Math.round(files['logo.svg'].length / 1024)} KB`);
+
+  // Compare with the copies the site uses (line endings ignored).
+  const norm = (s) => s.replace(/\r\n/g, '\n');
+  const result = {};
+  for (const name of Object.keys(files)) {
+    try {
+      const live = await (await fetch('../../images/' + name, { cache: 'no-store' })).text();
+      result[name] = norm(live) === files[name] ? 'identical' : 'different';
+    } catch { result[name] = 'could not compare'; }
+    log(`${name} vs images/${name}: ${result[name]}`);
+  }
+  for (const id of ['dl-logo', 'dl-fav', 'dl-star']) document.getElementById(id).disabled = false;
+  document.getElementById('status').textContent = 'Done.';
+  return result;
+};
+
+function download(name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([files[name]], { type: 'image/svg+xml' }));
+  a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById('build').addEventListener('click', async (e) => {
+  e.target.disabled = true; document.getElementById('status').textContent = 'Working… (takes a few seconds)';
+  try { await buildAll(); } catch (err) { document.getElementById('status').textContent = 'Error: ' + err.message; }
+  e.target.disabled = false;
+});
+document.getElementById('dl-logo').addEventListener('click', () => download('logo.svg'));
+document.getElementById('dl-fav').addEventListener('click', () => download('favicon.svg'));
+document.getElementById('dl-star').addEventListener('click', () => download('star.svg'));
+</script>
+</body>
+</html>
