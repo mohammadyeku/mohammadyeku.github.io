@@ -12,8 +12,9 @@
   --line: #e3e3e0;
   --soft: #f1f1ef;
 
-  --font-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Latin glyphs come from the first font, Japanese from the Noto fallbacks */
+  --font-display: "Bodoni Moda", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  --font-body: "Inter", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
   --font-jp: "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
 
   --max: 1200px;
@@ -45,7 +46,9 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 1rem;
-  line-height: 1.65;
+  line-height: 1.9;
+  letter-spacing: 0.03em;
+  line-break: strict;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -92,7 +95,7 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
 }
 .brand {
   display: inline-flex; align-items: center; gap: 10px;
-  font-family: var(--font-display); font-size: 1.15rem; letter-spacing: 0.01em;
+  font-family: var(--font-jp); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.22em;
   text-decoration: none; white-space: nowrap;
 }
 .brand .star { width: 14px; height: 14px; transition: transform .6s var(--ease); }
@@ -101,7 +104,7 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
 .site-header ul { display: flex; gap: clamp(14px, 3vw, 36px); list-style: none; margin: 0; padding: 0; }
 .site-header nav a {
   position: relative;
-  text-decoration: none; font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase;
+  text-decoration: none; font-family: var(--font-jp); font-size: 0.88rem; letter-spacing: 0.22em;
   color: var(--muted); transition: color .2s;
 }
 .site-header nav a:hover { color: var(--ink); }
@@ -125,19 +128,55 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
 }
 .vertical {
   margin: 0; writing-mode: vertical-rl;
-  font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--muted);
+  font-family: var(--font-jp); font-size: 0.8rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--muted);
   display: flex; align-items: center; gap: 14px;
   animation: fade 1.2s .3s var(--ease) both;
 }
 .vertical .star { width: 8px; height: 8px; }
 .v-left { grid-column: 1; grid-row: 1; justify-self: end; align-self: end; }
 .v-right { grid-column: 3; grid-row: 1; justify-self: start; align-self: start; }
-.hero-intro {
+.hero-text {
   grid-column: 1 / -1; grid-row: 2; justify-self: center; text-align: center;
-  margin: 0; max-width: 34ch;
-  font-family: var(--font-display); font-style: italic; font-size: clamp(1.1rem, 2.2vw, 1.4rem); line-height: 1.4;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
   animation: fade 1.2s .45s var(--ease) both;
 }
+.hero-text .soon { margin: 0; font-size: clamp(1.15rem, 2.4vw, 1.5rem); }
+.hero-intro {
+  margin: 0; max-width: 30em;
+  font-family: var(--font-jp); font-size: clamp(0.95rem, 1.8vw, 1.1rem); line-height: 2; letter-spacing: 0.1em;
+  color: var(--muted);
+  word-break: keep-all; overflow-wrap: anywhere; text-wrap: balance; /* wrap at 、 not mid-phrase */
+}
+
+/* "Coming soon" badge: star + 近日公開 + small Latin */
+.soon {
+  display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center;
+  margin: 0 0 14px;
+  font-family: var(--font-jp); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.4em;
+}
+.soon .star { width: 0.7em; height: 0.7em; }
+.soon-en {
+  font-family: var(--font-body); font-weight: 400; font-size: 0.62rem; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--muted);
+}
+.lead { margin: 0; max-width: 36em; color: var(--muted); }
+.section-body > .big {
+  margin: 0 0 clamp(28px, 4vw, 44px);
+  font-family: var(--font-jp); font-weight: 500; font-size: clamp(1.25rem, 2.6vw, 1.7rem); line-height: 1.7; letter-spacing: 0.08em;
+}
+
+/* Empty "準備中" slots shown until real tracks / work go in */
+.ghosts {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 24px;
+  margin-top: clamp(32px, 4vw, 48px);
+}
+.ghosts .embed-placeholder span { font-family: var(--font-jp); letter-spacing: 0.3em; }
+.ghost-tile {
+  aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: var(--soft); color: var(--muted);
+  font-family: var(--font-jp); font-size: 0.75rem; letter-spacing: 0.3em;
+}
+.ghost-tile .star { width: 18px; height: 18px; opacity: .6; }
 .scroll-cue {
   position: absolute; left: 50%; bottom: 28px; translate: -50% 0;
   display: grid; place-items: center; width: 44px; height: 44px; text-decoration: none;
@@ -159,13 +198,13 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
   display: flex; flex-direction: column; align-items: center; gap: 18px;
   color: var(--muted);
 }
-.section-label .num { font-size: 0.72rem; letter-spacing: 0.2em; }
-.section-label .jp {
+.section-label .num { font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.2em; }
+.section-label .en {
   writing-mode: vertical-rl;
-  font-family: var(--font-jp); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.5em; color: var(--ink);
+  font-size: 0.66rem; letter-spacing: 0.34em; text-transform: uppercase;
 }
 .section-body h2 {
-  font-family: var(--font-display); font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1; letter-spacing: -0.01em;
+  font-family: var(--font-jp); font-weight: 500; font-size: clamp(2.2rem, 5.6vw, 3.8rem); line-height: 1.2; letter-spacing: 0.14em;
 }
 .section-body > .rule { margin: clamp(20px, 3vw, 32px) 0 clamp(36px, 5vw, 64px); }
 
@@ -262,7 +301,7 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
 }
 .lightbox::backdrop { background: color-mix(in srgb, var(--bg) 94%, transparent); }
 .lightbox img { max-height: 84vh; width: auto; margin: 0 auto; }
-.lightbox-caption { text-align: center; color: var(--muted); margin: 14px 0 0; font-family: var(--font-display); font-style: italic; }
+.lightbox-caption { text-align: center; color: var(--muted); margin: 14px 0 0; font-family: var(--font-jp); }
 .lightbox-close {
   position: fixed; top: 16px; right: 16px;
   width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%;
@@ -281,14 +320,18 @@ h1, h2, h3 { margin: 0; font-weight: 400; }
   .brand { font-size: 1rem; gap: 8px; }
   .brand .star { width: 11px; height: 11px; }
   .site-header ul { gap: 14px; }
-  .site-header nav a { font-size: 0.64rem; letter-spacing: 0.12em; }
+  .site-header nav a { font-size: 0.8rem; letter-spacing: 0.16em; }
   .hero { grid-template-columns: auto 1fr auto; column-gap: 12px; min-height: calc(100svh - 52px); }
   .hero-logo svg { height: auto; width: 100%; max-height: 62svh; }
   .hero-logo { justify-self: center; }
-  .vertical { font-size: 0.62rem; letter-spacing: 0.26em; }
+  .vertical { font-size: 0.7rem; letter-spacing: 0.32em; }
   .section { gap: 0 14px; }
   .section-label { top: 72px; gap: 12px; }
-  .section-label .jp { font-size: 0.9rem; letter-spacing: 0.4em; }
+  .section-label .en { font-size: 0.58rem; letter-spacing: 0.28em; }
+  .ghosts { grid-template-columns: 1fr; }
+  .ghosts-square { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .ghost-tile { font-size: 0.62rem; letter-spacing: 0.2em; gap: 8px; }
+  .ghost-tile .star { width: 12px; height: 12px; }
   .gallery { grid-template-columns: 1fr; }
   .gallery .wide { grid-column: auto; }
   .wide .zoom img { aspect-ratio: 16 / 10; }

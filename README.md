@@ -4,7 +4,11 @@ Personal portfolio — music and graphic design. Plain HTML/CSS, hosted free on 
 
 ## Editing
 
-Everything you'll change is in `index.html`; look for `EDIT:` comments.
+Everything you'll change is in `index.html`; look for `EDIT:` / `WHEN ... IS READY` comments.
+
+The site is in Japanese. Until content is ready, each section shows a 近日公開 (coming soon)
+badge and empty 準備中 slots; the comment inside each section has the markup to paste in
+when its content arrives (tracks, gallery, profile, contact).
 
 - **Music:** paste embed `<iframe>`s from SoundCloud / YouTube / Bandcamp
   (examples in the comment above the tracks). Don't put audio files in this repo.
