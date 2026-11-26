@@ -16,13 +16,13 @@ when its content arrives (tracks, gallery, profile, contact).
   and update the `<figure>` blocks.
 - **Colours / fonts:** the variables at the top of `css/style.css` (light and dark sets).
 - **Logo:** `images/logo.svg` is a single path with `id="logo"` and `fill="currentColor"`,
-  so `<svg viewBox="0 0 1423 1829"><use href="images/logo.svg#logo"/></svg>` takes the
+  so `<svg viewBox="0 0 2934 3956"><use href="images/logo.svg#logo"/></svg>` takes the
   text colour (black on light, white on dark). `images/star.svg` is the matching
   four-point star used across the site; `images/favicon.svg` is the browser tab icon.
 
 Preview locally with `pwsh -NoProfile -File tools/serve.ps1 -Root . -Port 8080`
 and open http://localhost:8080/ (the logo doesn't show when opening `index.html` as a file).
-The logo is rebuilt from the original scan with `tools/logo/`; see [tools/README.md](tools/README.md). Commit and push to `main`;
+The logo is made from an image with `tools/logo/vectorize.html`; see [tools/README.md](tools/README.md). Commit and push to `main`;
 GitHub Pages republishes in about a minute.
 
 ## Hosting

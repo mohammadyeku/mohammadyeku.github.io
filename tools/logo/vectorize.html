@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Logo vectorizer</title>
+<style>
+  body { margin: 0; padding: 16px; background: #fff; color: #111; font: 13px/1.5 system-ui, sans-serif; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 12px; }
+  label { display: inline-flex; gap: 6px; align-items: center; }
+  input[type=number] { width: 4.5em; }
+  button { font: inherit; padding: 6px 12px; border: 1px solid #111; background: #fff; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: flex-start; }
+  .row > * { width: 32vw; height: auto; border: 1px solid #ccc; }
+  #out svg { width: 100%; height: auto; display: block; }
+  #log { white-space: pre-wrap; background: #f4f4f2; padding: 8px; }
+</style>
+<!-- Pinned tracer version: the output depends on it -->
+<script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"></script>
+<script src="smooth.js"></script>
+</head>
+<body>
+<p>Turns a black-on-white or black-on-transparent logo image (PNG, JPG, or an SVG that only wraps a PNG)
+into a compact one-path SVG with <code>id="logo"</code> and <code>fill="currentColor"</code>, ready for <code>images/logo.svg</code>.
+Nothing is uploaded; it all runs in this page.</p>
+<div class="bar">
+  <label>Image <input type="file" id="file" accept="image/png,image/jpeg,image/webp,.svg"></label>
+  <label title="Blur before thresholding, px. Removes stair-steps; higher rounds tips.">Blur <input id="blur" type="number" value="1" step="0.5" min="0"></label>
+  <label title="0-255: lower = thinner strokes">Threshold <input id="thresh" type="number" value="128" step="4" min="1" max="254"></label>
+  <label title="How much edges are smoothed between corners (contour points)">Smoothing <input id="sigma" type="number" value="3" step="1" min="0"></label>
+  <label title="Turn angle (degrees) that counts as a sharp corner; corners are never smoothed">Corner angle <input id="turnDeg" type="number" value="50" step="5" min="10" max="170"></label>
+  <label title="Max distance (px of the image) the simplified outline may stray">Tolerance <input id="eps" type="number" value="0.5" step="0.1" min="0.1"></label>
+  <label title="Output units per image pixel (0.5 = half-size coordinates, smaller file)">Scale <input id="scale" type="number" value="1" step="0.05" min="0.05"></label>
+  <button id="run" type="button" disabled>Vectorize</button>
+  <button id="dl" type="button" disabled>Download logo.svg</button>
+  <span id="status">Choose an image.</span>
+</div>
+<div class="row"><canvas id="bin" title="Thresholded image"></canvas><div id="out" title="Result"></div><canvas id="diff" title="Red = ink lost, blue = ink added"></canvas></div>
+<pre id="log"></pre>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const log = (...a) => ($('log').textContent += a.join(' ') + '\n');
+let source = null, result = null;
+
+// ---------- loading ----------
+async function imageFromUrl(url) {
+  const img = new Image(); img.src = url; await img.decode(); return img;
+}
+// PNG/JPG directly; an SVG that wraps a raster -> that raster; a real vector SVG -> rasterised ~3000px wide.
+async function loadSource(blobOrUrl, name = '') {
+  const blob = typeof blobOrUrl === 'string' ? await (await fetch(blobOrUrl, { cache: 'no-store' })).blob() : blobOrUrl;
+  const isSvg = /svg/.test(blob.type) || /\.svg$/i.test(name || blobOrUrl);
+  if (!isSvg) return imageFromUrl(URL.createObjectURL(blob));
+  const text = await blob.text();
+  const m = text.match(/href="(data:[^"]+)"/);
+  if (m) { // fix the non-standard "data:img/png" some exporters write
+    log('SVG wraps an embedded image; tracing that image.');
+    return imageFromUrl(m[1].replace(/^data:img\//, 'data:image/'));
+  }
+  const vb = text.match(/viewBox="[\d.\s-]*?([\d.]+)\s+([\d.]+)"/);
+  const w = vb ? +vb[1] : 1000, h = vb ? +vb[2] : 1000, k = 3000 / w;
+  const sized = text.replace(/<svg\b/, `<svg width="${w * k}" height="${h * k}"`);
+  log('Vector SVG; rasterising at 3000 px wide and retracing.');
+  return imageFromUrl(URL.createObjectURL(new Blob([sized], { type: 'image/svg+xml' })));
+}
+
+// ---------- tracing ----------
+function binarize(img, blur, thresh) {
+  const W = img.naturalWidth, H = img.naturalHeight, c = $('bin'); c.width = W; c.height = H;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);           // transparent -> white
+  x.filter = `grayscale(1) blur(${blur}px)`; x.drawImage(img, 0, 0); x.filter = 'none';
+  const d = x.getImageData(0, 0, W, H), p = d.data;
+  let minX = W, minY = H, maxX = -1, maxY = -1;
+  for (let i = 0; i < p.length; i += 4) {
+    const v = p[i] < thresh ? 0 : 255; p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255;
+    if (!v) { const k = i >> 2, px = k % W, py = (k / W) | 0;
+      if (px < minX) minX = px; if (px > maxX) maxX = px; if (py < minY) minY = py; if (py > maxY) maxY = py; }
+  }
+  x.putImageData(d, 0, 0);
+  return { d, W, H, bbox: [minX, minY, maxX, maxY] };
+}
+
+// Absolute M/C/L/Z path -> compact relative path in output units (rounded, near-straight curves -> lines).
+function encode(dAbs, ox, oy, s, dec, lineTol) {
+  const f = 10 ** dec, q = (v) => Math.round(v * f) / f;
+  const fmt = (v) => { let t = (Math.round(v * f) / f).toString(); return t === '-0' ? '0' : t; };
+  const T = dAbs.match(/[MCLZ]|-?\d*\.?\d+(?:e[-+]?\d+)?/gi);
+  let out = '', last = '', cx = 0, cy = 0, sx = 0, sy = 0, i = 0;
+  // Repeated commands are implicit; numbers need a space only between two digits (a "-" separates by itself).
+  const emit = (cmd, nums) => {
+    if (cmd !== last) { out += cmd; last = cmd; }
+    for (const t of nums.map(fmt)) out += (t[0] !== '-' && /\d$/.test(out) ? ' ' : '') + t;
+  };
+  const P = () => [q((+T[i++] - ox) * s), q((+T[i++] - oy) * s)];
+  while (i < T.length) {
+    const c = T[i++].toUpperCase();
+    if (c === 'M') { const [x, y] = P(); out += 'M' + fmt(x) + (y < 0 ? '' : ' ') + fmt(y); last = 'M'; cx = sx = x; cy = sy = y; }
+    else if (c === 'L') { const [x, y] = P(); if (x !== cx || y !== cy) emit('l', [x - cx, y - cy]); cx = x; cy = y; }
+    else if (c === 'C') {
+      const [x1, y1] = P(), [x2, y2] = P(), [x, y] = P();
+      if (x === cx && y === cy && x1 === cx && y1 === cy && x2 === cx && y2 === cy) continue;
+      // control points close to the chord -> a straight line is indistinguishable
+      const dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy);
+      const dist = (px, py) => L ? Math.abs((px - cx) * dy - (py - cy) * dx) / L : Math.hypot(px - cx, py - cy);
+      if (L && dist(x1, y1) <= lineTol && dist(x2, y2) <= lineTol) emit('l', [dx, dy]);
+      else emit('c', [x1 - cx, y1 - cy, x2 - cx, y2 - cy, dx, dy]);
+      cx = x; cy = y;
+    } else if (c === 'Z') { out += 'z'; last = 'z'; cx = sx; cy = sy; }
+  }
+  return out;
+}
+
+async function diff(svg, bin, ox, oy, s) {
+  const img = await imageFromUrl('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+  const vb = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+  const c = $('diff'); c.width = bin.W; c.height = bin.H; const x = c.getContext('2d', { willReadFrequently: true });
+  x.fillStyle = '#fff'; x.fillRect(0, 0, bin.W, bin.H);
+  x.drawImage(img, ox, oy, +vb[1] / s, +vb[2] / s);
+  const t = x.getImageData(0, 0, bin.W, bin.H), o = t.data, r = bin.d.data;
+  let missed = 0, extra = 0, ink = 0;
+  for (let i = 0; i < o.length; i += 4) {
+    const R = r[i] < 128, S = o[i] < 128; if (R) ink++;
+    if (R && !S) { missed++; o[i] = 230; o[i + 1] = 30; o[i + 2] = 30; }
+    else if (S && !R) { extra++; o[i] = 40; o[i + 1] = 110; o[i + 2] = 230; }
+    else { const v = S ? 0 : 255; o[i] = o[i + 1] = o[i + 2] = v; }
+  }
+  x.putImageData(t, 0, 0);
+  return { missedPct: +(100 * missed / ink).toFixed(3), extraPct: +(100 * extra / ink).toFixed(3) };
+}
+
+window.vectorize = async (o = {}) => {
+  const opt = Object.assign({ blur: +$('blur').value, thresh: +$('thresh').value, sigma: +$('sigma').value,
+    turnDeg: +$('turnDeg').value, eps: +$('eps').value, scale: +$('scale').value,
+    k: 12, pathomit: 40, pad: 16, dec: 0, lineTol: 0.35, title: '幾多百晴 — Ikuta Moha' }, o);
+  $('log').textContent = '';
+  const t0 = performance.now();
+  const bin = binarize(source, opt.blur, opt.thresh);
+  const [x0, y0, x1, y1] = bin.bbox;
+  if (x1 < 0) throw new Error('No dark pixels found.');
+  const r = smoothTrace(bin.d, { pathomit: opt.pathomit, k: opt.k, turnDeg: opt.turnDeg, sigma: opt.sigma, eps: opt.eps, tension: 1 }, (v) => v, (v) => v);
+  // internode coords are pixel-edge midpoints; +0.5 shifts nothing visible but keep crop symmetric
+  const ox = x0 - opt.pad, oy = y0 - opt.pad, s = opt.scale;
+  const W = Math.ceil((x1 - x0 + 1 + 2 * opt.pad) * s), H = Math.ceil((y1 - y0 + 1 + 2 * opt.pad) * s);
+  const d = r.parts.map((p) => encode(p.d, ox, oy, s, opt.dec, opt.lineTol)).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="t">\n<title id="t">${opt.title}</title>\n<path id="logo" fill="currentColor" fill-rule="evenodd" d="${d}"/>\n</svg>\n`;
+  $('out').innerHTML = svg;
+  const q = await diff(svg, bin, ox, oy, s);
+  result = { svg, W, H };
+  const stats = { source: [bin.W, bin.H], viewBox: [W, H], subpaths: r.nSub, corners: r.nCorners,
+    kb: +(svg.length / 1024).toFixed(1), ...q, ms: Math.round(performance.now() - t0) };
+  log(JSON.stringify(stats));
+  log('missed = ink in the image the SVG leaves out; extra = ink the SVG adds (% of all ink). Under ~1% is invisible at web sizes.');
+  $('dl').disabled = false; $('status').textContent = 'Done.';
+  return stats;
+};
+window.getSvg = () => result && result.svg;
+
+async function useSource(p) {
+  $('status').textContent = 'Loading…';
+  source = await p; $('run').disabled = false;
+  $('status').textContent = `Loaded ${source.naturalWidth}×${source.naturalHeight}. Press Vectorize.`;
+}
+$('file').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) useSource(loadSource(f, f.name)); });
+$('run').addEventListener('click', async () => {
+  $('run').disabled = true; $('status').textContent = 'Working… (a few seconds)';
+  try { await vectorize(); } catch (err) { $('status').textContent = 'Error: ' + err.message; }
+  $('run').disabled = false;
+});
+$('dl').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([result.svg], { type: 'image/svg+xml' })); a.download = 'logo.svg'; a.click();
+});
+// ?src=path loads an image straight away (handy when serving locally)
+const src = new URLSearchParams(location.search).get('src');
+if (src) useSource(loadSource(src, src));
+</script>
+</body>
+</html>
